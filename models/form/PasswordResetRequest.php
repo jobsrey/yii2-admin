@@ -48,8 +48,16 @@ class PasswordResetRequest extends Model
             }
 
             if ($user->save()) {
+                $alamatEmail = Yii::$app->globalSetting->getOptions('email_sender');
+                
+                if($alamatEmail == ''){
+                    $alamatEmail = isset(Yii::$app->params['supportEmail']) ?
+                    Yii::$app->params['supportEmail']
+                    : 'no-reply@example.com';
+                }
+                
                 return Yii::$app->mailer->compose(['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'], ['user' => $user])
-                    ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
+                    ->setFrom([$alamatEmail  => Yii::$app->name . ' robot'])
                     ->setTo($this->email)
                     ->setSubject('Password reset for ' . Yii::$app->name)
                     ->send();
